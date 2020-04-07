@@ -182,14 +182,7 @@ displayProgress() # Calculate/collect progress
   touch "./vstats"
   (( PERCENTAGE = 0 ))
 
-######### There are so many better ways to do this, but zsh is acting up #########
-#########  while [ -e /proc/$PID ]; do   # Is FFmpeg running? This would only work in a Linux system. Darwin doesn't have /proc support
-#########  while [[ $( ps ${PID} ) ]]; do
-#########  while ps -p ${PID} > /dev/null; do
-#########  while $( `kill -0 ${PID} 2> /dev/null` ); do
-#########  while [[ `lsof -p $PID +r 1m%s -t | grep -qm1 $(date -v+1S +%s 2>/dev/null || echo INF)` && true || false ]]; do
-
-  while [[ ${PERCENTAGE} -lt 99 ]]; do
+  while [[ $( ps ${PID} | grep ${PID} | wc -w ) -gt 0 ]]; do
 
     sleep 2
     VSTATS=$(gawk '{gsub(/frame=/, "")}/./{line=$5} END{print line}' "./vstats")  # Parse vstats
