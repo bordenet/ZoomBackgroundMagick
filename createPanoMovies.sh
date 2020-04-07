@@ -1,5 +1,6 @@
 #!/bin/zsh
 #
+# Public GitHub: https://github.com/bordenet/ZoomBackgroundMagick
 # Author: Matt Bordenet
 # Version: 1.0
 # 6 Apr 2020
@@ -33,6 +34,10 @@ finalRender="panoMovie.mp4"
 use_hw_accel="no"
 do_canonicalize_file_names="no"
 do_transpose_images="no"
+
+throttle_cpu_for_extended_runs="yes"  # ffmpeg and its filters can become a resource hog for large panoramas
+secondsUntilProcessThrottling=360
+secondsSuspended=720
 
 log_level_ffmpeg="quiet"
 sleep_time=360
@@ -175,16 +180,22 @@ canonicalize-file-names() {
   fi
 }
 
+
 #--------------------------------
 displayProgress() # Calculate/collect progress 
 {
   FR_CNT=0;
+
+  (( ffmpegProcessRunning = 1 ))
+  (( ffmpegThrottleNoticeShown = 0 ))
+  (( ffmpegThrottleCounter = 0 ))
+
   touch "./vstats"
   (( PERCENTAGE = 0 ))
 
   while [[ $( ps ${PID} | grep ${PID} | wc -w ) -gt 0 ]]; do
 
-    sleep 2
+    sleep 1
     VSTATS=$(gawk '{gsub(/frame=/, "")}/./{line=$5} END{print line}' "./vstats")  # Parse vstats
 
     if [[ ${VSTATS} -gt ${FR_CNT} ]]; then
@@ -193,6 +204,29 @@ displayProgress() # Calculate/collect progress
     fi
 
     echo -ne "\rCurrent frame: ${FR_CNT} of ${TOT_FR}     Elapsed time: $SECONDS seconds     Percent complete: ${PERCENTAGE}%"
+
+    if [[ ${throttle_cpu_for_extended_runs} == "yes" ]]; then {
+        (( ffmpegThrottleCounter = ${ffmpegThrottleCounter} + 1 ))
+
+        if [[ ( "${PID}" -gt "0" ) && ( "${SECONDS}" -gt "${secondsUntilProcessThrottling}" ) ]]; then {
+
+          if [[ $ffmpegThrottleNoticeShown == "0" ]]; then {
+            (( ffmpegThrottleNoticeShown = 1 ))
+              printf "\n" && print-banner-prefix && printf "${RED} Throttling mode engaged to keep your machine + battery from overheating!${ENDCOLOR}\n"
+          } fi
+
+          (( modulus = $ffmpegThrottleCounter % $secondsSuspended ))
+          if [[ $modulus == "0" ]]; then {
+            if [[ "${ffmpegProcessRunning}" == "1" ]]; then {
+              (( ffmpegProcessRunning = 0 ))
+              kill -STOP ${PID} || echo "error halting"
+            } else {
+              (( ffmpegProcessRunning = 1 ))
+              kill -CONT ${PID} || echo "error resuming"
+            } fi
+          } fi
+        } fi
+    } fi
 
   done
 
@@ -212,6 +246,7 @@ doLongRunning_ffmpeg_Task() {
   touch vstats && - rm -rf vstats ||:
   touch vstats
   touch "${finalRender}" && - rm -rf "${finalRender}" ||:
+  PID=0
 
   FPS=$(ffprobe "${intermediateRender}" 2>&1 | sed -n "s/.*, \(.*\) tbr.*/\1/p")
   DUR=$(ffprobe "${intermediateRender}" 2>&1 | sed -n "s/.* Duration: \([^,]*\), .*/\1/p")
