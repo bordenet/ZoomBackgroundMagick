@@ -43,7 +43,7 @@ log_level_ffmpeg="quiet"
 sleep_time=360
 
 pixel_slew=1024          # pixels to jump between pan transitions
-pan_inc_denominator=1024 # divides pixel_slew time the number of frames in pre-processed mp4
+pan_inc_denominator=1024 # divides pixel_slew times the number of frames in pre-processed mp4
 clock_multiplier=1.5     # multiplier we'll apply to presentation times -- to elongate the movie
 blurfactor=4             # frames per second in final
 
@@ -65,10 +65,11 @@ print-banner-prefix() {
 
 #--------------------------------
 print-banner() {
-  printf "\n"
-  printf "${GREEN}" && printf "=%.0s" {1..20} && printf "${ENDCOLOR}"
-  printf " $1 "
-  printf "${GREEN}" && printf "=%.0s" {1..80} && printf "${ENDCOLOR}"
+  message="$1"
+  msgLen=`expr "x$message" : '.*' - 1`
+  (( lenBanner = 72 - $msgLen ))
+  printf "\n${GREEN}" && printf "=%.0s" {1..16} && printf "${ENDCOLOR} $message ${GREEN}"
+  printf "=%.0s" {1..$lenBanner} && printf "${ENDCOLOR}"
 }
 
 #--------------------------------
