@@ -256,7 +256,7 @@ doLongRunning_ffmpeg_Task() {
   SEC=$(echo ${DUR} | cut -d":" -f3)
   TOT_FR=$(echo "(${HRS}*3600+${MIN}*60+${SEC})*${FPS}*${clock_multiplier}*${blurfactor}-${blurfactor}" | bc | cut -d"." -f1)
 
-#  echo "\n\n### FPS: $FPS\tDUR: $DUR\tHRS: $HRS\tMIN: $MIN\tSEC: $SEC\tTOT_FR: $TOT_FR\n\n"
+  # echo "\n\n### FPS: $FPS\tDUR: $DUR\tHRS: $HRS\tMIN: $MIN\tSEC: $SEC\tTOT_FR: $TOT_FR\n\n"
 
   if [[ ! "${TOT_FR}" -gt "0" ]]; then echo error; fi
 
@@ -264,7 +264,7 @@ doLongRunning_ffmpeg_Task() {
     nice -n 15 ffmpeg -y -vstats_file "$( pwd )/vstats" -i "${intermediateRender}" -vcodec h264_videotoolbox -vf \
                       "minterpolate='fps=${blurfactor}',setpts=${clock_multiplier}*PTS" -f mp4 "${finalRender}" 2>/dev/null &
   } else {
-    nice -n 25 ffmpeg -y -vstats_file "$( pwd )/vstats" -i "${intermediateRender}" -vf \
+    nice -n 15 ffmpeg -y -vstats_file "$( pwd )/vstats" -i "${intermediateRender}" -vf \
                       "minterpolate='fps=${blurfactor}',setpts=${clock_multiplier}*PTS" -f mp4 "${finalRender}" 2>/dev/null &
   }
   fi
