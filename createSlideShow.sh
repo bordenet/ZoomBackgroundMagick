@@ -7,6 +7,8 @@
 # As part of dealing with the new realities of COVID-19 and the fact people are trying the Zoom communications platform,
 # I created this project to generate fun assets compatible with the Zoom faux chroma-keyed video background feature.
 #
+# This script will transform a set of static image assets into a simple slideshow movie
+#
 # Use at your own risk! No warranties are expressed or implied.
 #
 setopt cshnullglob nullglob
