@@ -1,4 +1,19 @@
 #!/bin/zsh
+#
+# Author: Matt Bordenet
+# Version: 1.0
+# 6 Apr 2020
+#
+# As part of dealing with the new realities of COVID-19 and the fact people are trying the Zoom communications platform,
+# I created this project to generate fun assets compatible with the Zoom faux chroma-keyed video background feature.
+#
+# This script will transform a panoramic image into a slowly scrolling movie
+#
+# Kudos to https://gist.github.com/pruperting/397509/2a5937c5ebe456695beff32fde08d286cf6ee2ea, which served as an 
+# inspiration for some of this work.
+#
+# Use at your own risk! No warranties are expressed or implied.
+#
 SCRIPT=createPanoMovies.sh
 trap "killall ffmpeg $SCRIPT;" INT TERM EXIT  # Kill & clean if stopped.
 
