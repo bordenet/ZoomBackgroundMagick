@@ -1,4 +1,14 @@
 #!/bin/zsh
+#
+# Author: Matt Bordenet
+# Version: 1.0
+# 6 Apr 2020
+#
+# As part of dealing with the new realities of COVID-19 and the fact people are trying the Zoom communications platform,
+# I created this project to generate fun assets compatible with the Zoom faux chroma-keyed video background feature.
+#
+# Use at your own risk! No warranties are expressed or implied.
+#
 setopt cshnullglob nullglob
 
 # terminal colors
