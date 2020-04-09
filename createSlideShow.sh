@@ -123,7 +123,7 @@ canonicalize-file-names() {
     for photo in *.png; do
       [ -f "${photo}" ] || break
       printf "${BLUE}${photo}${ENDCOLOR}\t"
-      sum=$(echo -n "${photo}"|/usr/local/Cellar/md5sha1sum/0.9.5_1/bin/md5sum);
+      sum=$(echo -n "${photo}"|md5);
       sum="${sum:2:12}"
       mv -f "${photo}" "${sum}.png"
     done
