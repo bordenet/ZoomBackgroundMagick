@@ -318,7 +318,7 @@ generate-smooth-mp4() {
 
       ffmpeg -loglevel ${log_level_ffmpeg} -hide_banner -y -loop 1 -r 1 -i "${photo}" \
               -vf "crop=${video_width}:${video_height}:${pixel_slew}*n/${pan_inc_denominator}:${pic_top_offset}" \
-              -frames:v ${num_video_frames} -pix_fmt yuv420p -vcodec rawvideo -f nut "${intermediateRender}"
+              -frames:v ${num_video_frames} -pix_fmt yuv420p -vcodec libx264 -crf 0 "${intermediateRender}"
 
       doLongRunning_ffmpeg_Task
 
