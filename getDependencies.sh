@@ -6,3 +6,4 @@ brew install coreutils
 brew install gawk
 brew install imagemagick
 brew install imgcat
+brew install graphicsmagick
