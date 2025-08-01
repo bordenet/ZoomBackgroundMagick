@@ -1,9 +1,23 @@
 #!/bin/zsh
 
-printf "Installing dependencies..."
+printf "Installing dependencies...\n"
+
+echo "🎬 Installing video processing tools..."
 brew install ffmpeg
-brew install coreutils
-brew install gawk
-brew install imagemagick
+
+echo "🛠️  Installing core utilities..."
+brew install coreutils gawk
+
+echo "🖼️  Installing image processing libraries..."
+brew install imagemagick graphicsmagick
+
+echo "🔄 Installing image conversion tools..."
+brew install leptonica
+
+echo "🖥️  Installing terminal utilities..."
 brew install imgcat
-brew install graphicsmagick
+
+echo "✅ All dependencies installed!"
+echo ""
+echo "Verify installation with:"
+echo "which ffmpeg ffprobe gm identify convertformat gawk sips md5 bc"
