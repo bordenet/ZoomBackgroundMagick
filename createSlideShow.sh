@@ -1,16 +1,14 @@
 #!/bin/zsh
 #
 # Author: Matt Bordenet
-# Version: 1.0
-# 6 Apr 2020
+# Version: 2.0
+# Updated: November 2025
 #
-# As part of dealing with the new realities of COVID-19 and the fact people are trying the Zoom communications platform,
-# I created this project to generate fun assets compatible with the Zoom faux chroma-keyed video background feature.
+# Transform static images into slideshow videos for Zoom backgrounds.
 #
-# This script will transform a set of static image assets into a simple slideshow movie
+# Use at your own risk. No warranties expressed or implied.
 #
-# Use at your own risk! No warranties are expressed or implied.
-#
+set -o pipefail
 setopt cshnullglob nullglob
 
 # terminal colors
@@ -33,8 +31,27 @@ log_level_ffmpeg="quiet"
 clock_multiplier=30.0
 
 #--------------------------------
+check-dependencies() {
+  local missing_deps=()
+  local required_commands=("ffmpeg" "convertformat" "sips" "md5")
+
+  for cmd in "${required_commands[@]}"; do
+    if ! command -v "$cmd" &> /dev/null; then
+      missing_deps+=("$cmd")
+    fi
+  done
+
+  if [[ ${#missing_deps[@]} -gt 0 ]]; then
+    printf "${RED}Error: Missing required dependencies:${ENDCOLOR}\n"
+    printf "${YELLOW}%s${ENDCOLOR}\n" "${missing_deps[@]}"
+    printf "\n${GREEN}Run ./getDependencies.sh to install all dependencies.${ENDCOLOR}\n"
+    exit 1
+  fi
+}
+
+#--------------------------------
 clone-eligible-files() {
-  printf "\n${CYN}cloning eligible files... ${ENDCOLOR}"
+  printf "\n${CYN}Cloning eligible files... ${ENDCOLOR}"
 
   rm -rf ${tmpdir}
   mkdir -p ${tmpdir}
@@ -43,10 +60,10 @@ clone-eligible-files() {
     if [[ -e "${photo}" ]]; then
       printf "${BLUE}${photo}${ENDCOLOR}\t"
       cp "${photo}" "${tmpdir}"/"${photo}"
-    fi 
+    fi
   done
 
-  printf "\n${CYN}cloning eligible files... Done!${ENDCOLOR}\n"
+  printf "\n${CYN}Done!${ENDCOLOR}\n"
 }
 
 
@@ -173,6 +190,7 @@ cleanup() {
 #--------------------------------
 printf "${GREEN}createSlideshow.sh ${ENDCOLOR}\n"
 
+check-dependencies
 clone-eligible-files
 canonicalize-file-types
 canonicalize-file-names

@@ -2,21 +2,19 @@
 #
 # Public GitHub: https://github.com/bordenet/ZoomBackgroundMagick
 # Author: Matt Bordenet
-# Version: 1.0
-# 6 Apr 2020
+# Version: 2.0
+# Updated: November 2025
 #
-# As part of dealing with the new realities of COVID-19 and the fact people are trying the Zoom communications platform,
-# I created this project to generate fun assets compatible with the Zoom faux chroma-keyed video background feature.
+# Transform panoramic images into slowly scrolling videos for Zoom backgrounds.
 #
-# This script will transform a panoramic image into a slowly scrolling movie
+# Kudos to https://gist.github.com/pruperting/397509/2a5937c5ebe456695beff32fde08d286cf6ee2ea
 #
-# Kudos to https://gist.github.com/pruperting/397509/2a5937c5ebe456695beff32fde08d286cf6ee2ea, which served as an 
-# inspiration for some of this work.
+# Use at your own risk. No warranties expressed or implied.
 #
-# Use at your own risk! No warranties are expressed or implied.
-#
+set -o pipefail
+
 SCRIPT=createPanoMovies.sh
-trap "killall ffmpeg $SCRIPT;" INT TERM EXIT  # Kill & clean if stopped.
+trap "killall ffmpeg $SCRIPT 2>/dev/null; exit" INT TERM EXIT
 
 # terminal colors
 RED=$'\e[1;31m'
@@ -46,6 +44,25 @@ pixel_slew=1024          # pixels to jump between pan transitions
 pan_inc_denominator=1024 # divides pixel_slew times the number of frames in pre-processed mp4
 clock_multiplier=1.5     # multiplier we'll apply to presentation times -- to elongate the movie
 blurfactor=4             # frames per second in final
+
+#--------------------------------
+check-dependencies() {
+  local missing_deps=()
+  local required_commands=("ffmpeg" "ffprobe" "gm" "convertformat" "gawk" "sips" "md5" "bc")
+
+  for cmd in "${required_commands[@]}"; do
+    if ! command -v "$cmd" &> /dev/null; then
+      missing_deps+=("$cmd")
+    fi
+  done
+
+  if [[ ${#missing_deps[@]} -gt 0 ]]; then
+    printf "${RED}Error: Missing required dependencies:${ENDCOLOR}\n"
+    printf "${YELLOW}%s${ENDCOLOR}\n" "${missing_deps[@]}"
+    printf "\n${GREEN}Run ./getDependencies.sh to install all dependencies.${ENDCOLOR}\n"
+    exit 1
+  fi
+}
 
 #--------------------------------
 sleep-between-runs() {
@@ -235,7 +252,7 @@ displayProgress() # Calculate/collect progress
   (( PERCENTAGE = 0 ))
   (( FR_CNT = 0 ))
   (( TOT_FR = 0 ))
-  - rm -rf ./vstats ||:
+  rm -rf ./vstats 2>/dev/null || true
 
   echo -ne "\r" && printf " %.0s" {1..120} && echo -ne "\r"
   sleep 2
@@ -243,10 +260,10 @@ displayProgress() # Calculate/collect progress
 
 #--------------------------------
 doLongRunning_ffmpeg_Task() {
- 
-  touch vstats && - rm -rf vstats ||:
+
+  rm -rf vstats 2>/dev/null || true
   touch vstats
-  touch "${finalRender}" && - rm -rf "${finalRender}" ||:
+  rm -rf "${finalRender}" 2>/dev/null || true
   PID=0
 
   FPS=$(ffprobe "${intermediateRender}" 2>&1 | sed -n "s/.*, \(.*\) tbr.*/\1/p")
@@ -269,9 +286,7 @@ doLongRunning_ffmpeg_Task() {
   }
   fi
 
-  PID=$! && 
-
-#echo "\n\nPID: ${PID}"
+  PID=$!
 
   displayProgress
 }
@@ -322,8 +337,8 @@ generate-smooth-mp4() {
 
       doLongRunning_ffmpeg_Task
 
-      - mv "${finalRender}" ../.
-      - rm -rf "${intermediateRender}"
+      mv "${finalRender}" ../. 2>/dev/null || true
+      rm -rf "${intermediateRender}" 2>/dev/null || true
 
       print-banner-prefix && printf "${RED} Operation took $SECONDS seconds.${ENDCOLOR}\n"
 
@@ -347,6 +362,7 @@ cleanup() {
 #--------------------------------
 printf "${GREEN}createPanoMovies.sh ${ENDCOLOR}\n"
 
+check-dependencies
 clone-eligible-files
 canonicalize-file-types
 canonicalize-file-names

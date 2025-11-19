@@ -1,64 +1,47 @@
 # ZoomBackgroundMagick
 
-Shell scripts to leverage ffmpeg for creating Zoom-compatible background videos from panoramic images and photo slideshows. Originally created during COVID-19 to generate fun assets for Zoom's virtual background feature.
+Shell scripts for creating Zoom-compatible background videos from panoramic images and photo slideshows using ffmpeg.
 
 ## Features
 
-- **createPanoMovies.sh**: Transform panoramic images into slowly scrolling background videos
-- **createSlideShow.sh**: Convert a collection of images into slideshow videos
-- **getDependencies.sh**: One-click dependency installer for macOS
+- **createPanoMovies.sh**: Transform panoramic images into scrolling background videos
+- **createSlideShow.sh**: Convert images into slideshow videos
+- **getDependencies.sh**: Automated dependency installer for macOS
 
 ## Requirements
 
-- **macOS Catalina (10.15) or newer**
-- **Homebrew** package manager
-- **Zsh shell** (default on modern macOS)
+- macOS Catalina (10.15) or newer
+- Homebrew package manager
+- Zsh shell (default on modern macOS)
 
 ## Quick Setup
 
-For first-time users, run the automated dependency installer:
+Run the automated dependency installer:
 
 ```bash
+chmod +x getDependencies.sh
 ./getDependencies.sh
 ```
 
-This installs all required dependencies via Homebrew.
+This installs all required dependencies via Homebrew and verifies the installation.
 
 ## Manual Setup
 
-If you prefer to install dependencies manually:
-
-### 1. Install Homebrew (if not already installed)
+### 1. Install Homebrew
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### 2. Install Required Dependencies
+### 2. Install Dependencies
 
 ```bash
-# Core video processing
-brew install ffmpeg
-
-# Text processing and utilities  
-brew install coreutils gawk
-
-# Image processing libraries
-brew install imagemagick graphicsmagick
-
-# Image conversion tools
-brew install leptonica
-
-# Terminal image preview (optional)
-brew install imgcat
+brew install ffmpeg coreutils gawk imagemagick graphicsmagick leptonica
 ```
 
 ### 3. Verify Installation
 
-Check that all tools are available:
-
 ```bash
-# Should return paths for all commands
 which ffmpeg ffprobe gm identify convertformat gawk sips md5 bc
 ```
 
@@ -66,99 +49,83 @@ which ffmpeg ffprobe gm identify convertformat gawk sips md5 bc
 
 ### Creating Panoramic Videos
 
-1. Place your panoramic images (JPG, PNG, WEBP) in the project directory
-2. Run the panoramic video generator:
+Place panoramic images (JPG, PNG, WEBP) in the project directory and run:
 
 ```bash
+chmod +x createPanoMovies.sh
 ./createPanoMovies.sh
 ```
 
-**Requirements for panoramic images:**
-- Images must be at least 3x wider than their height
+**Image Requirements:**
+- Width must be at least 3x the height
 - Minimum width: 256 pixels
 - Supported formats: JPG, JPEG, PNG, WEBP
 
-The script will:
-- Process only images meeting panoramic criteria
-- Generate smooth scrolling videos optimized for Zoom (max 1920x1080)
-- Create MP4 files with the same base name as your images
+**Output:**
+- Smooth scrolling videos optimized for Zoom (max 1920x1080)
+- MP4 files with the same base name as source images
 
 ### Creating Slideshow Videos
 
-1. Place your images in the project directory
-2. Run the slideshow generator:
+Place images in the project directory and run:
 
 ```bash
+chmod +x createSlideShow.sh
 ./createSlideShow.sh
 ```
 
-This creates a single `slideshow.mp4` file from all images in the directory.
+Creates a single `slideshow.mp4` file from all images in the directory.
 
 ### Performance Notes
 
-- **CPU Throttling**: For large panoramas, the script automatically throttles CPU usage to prevent overheating
-- **Processing Time**: Large images may take considerable time to process
-- **Hardware Acceleration**: macOS hardware acceleration is available for supported systems
+- CPU throttling automatically engages for large panoramas to prevent overheating
+- Large images may take considerable time to process
+- Hardware acceleration available on supported macOS systems
 
-## Post-Processing Tips
+## Post-Processing
 
 ### Speed Up Videos
 
-Make your background videos scroll faster:
-
 ```bash
 # 4x faster
-ffmpeg -i ./background_movie_name.mp4 -filter:v "setpts=PTS/4" background_movie_name_4xfaster.mp4
-
-# 3x faster  
-ffmpeg -i ./background_movie_name.mp4 -filter:v "setpts=PTS/3" background_movie_name_3xfaster.mp4
+ffmpeg -i input.mp4 -filter:v "setpts=PTS/4" output_4x.mp4
 
 # 2x faster
-ffmpeg -i ./background_movie_name.mp4 -filter:v "setpts=PTS/2" background_movie_name_2xfaster.mp4
+ffmpeg -i input.mp4 -filter:v "setpts=PTS/2" output_2x.mp4
 ```
 
-### Additional ffmpeg Operations
+### Other ffmpeg Operations
 
-`ffmpeg` supports many other operations including:
-- Trimming/cutting video segments
-- Splicing multiple videos together
-- Adding audio tracks
-- Adjusting resolution and quality
+- Trim/cut video segments
+- Splice multiple videos
+- Add audio tracks
+- Adjust resolution and quality
 
 ## Troubleshooting
 
-### Common Issues
+### Missing Dependencies
 
-**"gm: command not found"**
-- Run `brew install graphicsmagick`
-- Restart your terminal
+Scripts will check for required dependencies and report missing tools. Run `./getDependencies.sh` to install them.
 
-**"gawk: command not found"**  
-- Run `brew install gawk`
+### Slow Performance
 
-**"convertformat: command not found"**
-- Run `brew install leptonica`
+CPU throttling is normal for large images. Check Activity Monitor for resource usage and ensure sufficient disk space.
 
-**Scripts hang or run slowly**
-- CPU throttling is normal for large images
-- Check Activity Monitor for resource usage
-- Ensure sufficient disk space for temporary files
-
-### Dependencies Not Installing
+### Installation Issues
 
 If `getDependencies.sh` fails:
 
 1. Update Homebrew: `brew update`
-2. Check for Homebrew issues: `brew doctor`
-3. Install dependencies manually using the commands above
+2. Check for issues: `brew doctor`
+3. Install dependencies manually (see Manual Setup)
 
 ## Technical Details
 
-- **Supported Image Formats**: JPG, JPEG, PNG, WEBP
-- **Output Format**: MP4 with H.264 encoding
+- **Input Formats**: JPG, JPEG, PNG, WEBP
+- **Output Format**: MP4 (H.264)
 - **Max Resolution**: 1920x1080 (Zoom requirement)
 - **Temporary Files**: Created in `*_tmp` directories, automatically cleaned up
 
 ## License
 
-This project is provided "as-is" with no warranties expressed or implied. Use at your own risk.
+CC0 1.0 Universal - Public Domain. See LICENSE file for details.
